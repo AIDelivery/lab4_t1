@@ -1,6 +1,9 @@
 #include <iostream>
+#include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
+
+using namespace std;
 
 void* my_foo(void * d) {
 	sleep(1);
@@ -9,14 +12,19 @@ void* my_foo(void * d) {
 }
 
 int main(int argv, char* argc[]) {
-	int n = 10;
+	pid_t pid = getpid();
 	void* data = NULL;
-	pthread_t* thread = new pthread_t[n];
+	pthread_t* thread = new pthread_t[5];
 	
-	for(int i = 0; i < n; ++i) {
-		pthread_create(&thread[i], NULL, my_foo, data);
-		pthread_join(thread[i], NULL);
+	sched_setparam(99);
+	
+	switch(sched_getscheduler(pid)) {
+		case 0: cout << "FIFO" << endl; break;
+		case 1: cout << "RR" << endl; break;
+		case 2: cout << "OTHER (dynamic scheduler)" << endl; break;
 	}
+	cout << "MAX PRIORITY: " << sched_get_priority_max(sched_getscheduler(pid)) << endl;
+	cout << "MIN PRIORITY: " << sched_get_priority_min(sched_getscheduler(pid)) << endl;
 	
 	return 0;
 }
