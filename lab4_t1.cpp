@@ -22,9 +22,7 @@ void* divided_foo(void* f) {
 	cout << endl << ">>" << endl;
 
 	if(rand() % 100 < 50) {
-		//
-		cout << "Luck up!" << endl;
-		// FILE* f = fopen(filename, "r");
+		cout << "Closing file..." << endl;
 		fclose((FILE *) f);
 		file_is_open = false;
 	}
@@ -38,8 +36,8 @@ void* divided_foo(void* f) {
 		default: cout << "Unknown" << endl; break;
 	}
 
-	cout << endl << "Current thread MAX priority: " << sched_get_priority_max(sched_getscheduler(pid)) << endl;
-	cout << "Current thread MIN priority: " << sched_get_priority_min(sched_getscheduler(pid)) << endl;
+	cout << endl << "Current thread sched-policy MAX priority: " << sched_get_priority_max(sched_getscheduler(pid)) << endl;
+	cout << "Current thread sched-policy MIN priority: " << sched_get_priority_min(sched_getscheduler(pid)) << endl;
 
 	pthread_exit(0);
 }
@@ -63,11 +61,11 @@ int main(int argv, char* argc[]) {
 	pthread_create(thread, &attr , divided_foo, f);
 	pthread_join(*thread , NULL);
 
-	cout << "Current process MAX priority: " << sched_get_priority_max(sched_getscheduler(getpid())) << endl;
-	cout << "Current process MIN priority: " << sched_get_priority_min(sched_getscheduler(getpid())) << endl;
+	cout << "Current process sched-policy MAX priority: " << sched_get_priority_max(sched_getscheduler(getpid())) << endl;
+	cout << "Current process sched-policy MIN priority: " << sched_get_priority_min(sched_getscheduler(getpid())) << endl;
 
 	if(file_is_open) {
-		cout << "File wasn't closed in thread. Closing...";
+		cout << "\nFile wasn't closed in thread. Closing...";
 		fclose(f);
 		cout << " Ready!" << endl;
 	}
