@@ -2,29 +2,28 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <stdio.h>
+#include <fstream>
 
 using namespace std;
 
+ifstream out_file;
 char* filename;
-bool file_is_open = true;
 
 void* divided_foo(void* f) {
 	pid_t pid = getpid();
+	char buff[50];
 
 	sleep(1);
-	char buff[50];
 	cout << "File " << filename << " content:\n<<" << endl;
 
-	while (fgets(buff, 50, (FILE *) f))
+	while (out_file.read(buff, 50))
 		cout << buff;
 
 	cout << endl << ">>" << endl;
 
 	if(rand() % 100 < 50) {
+		out_file.close();
 		cout << "Closing file..." << endl;
-		fclose((FILE *) f);
-		file_is_open = false;
 	}
 
 
@@ -51,22 +50,19 @@ int main(int argv, char* argc[]) {
 	pthread_attr_t attr;
 
 	filename = (char*) "INFO.txt";
-	FILE* f = fopen(filename, "r");
-	if(f == NULL) {
-			cout << "ERROR" << endl;
-			return 0;
-	}
+	out_file.open(filename);
 
 	pthread_attr_init(&attr);
-	pthread_create(thread, &attr , divided_foo, f);
+	pthread_create(thread, &attr , divided_foo, &out_file);
 	pthread_join(*thread , NULL);
 
 	cout << "Current process sched-policy MAX priority: " << sched_get_priority_max(sched_getscheduler(getpid())) << endl;
 	cout << "Current process sched-policy MIN priority: " << sched_get_priority_min(sched_getscheduler(getpid())) << endl;
 
-	if(file_is_open) {
+	if(out_file.is_open()) {
 		cout << "\nFile wasn't closed in thread. Closing...";
-		fclose(f);
+		out_file.close();
+		sleep(1);
 		cout << " Ready!" << endl;
 	}
 
